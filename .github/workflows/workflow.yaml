@@ -1,0 +1,113 @@
+name: Spark Rewards Pipelines
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [labeled, opened, synchronize]
+  workflow_dispatch:
+
+
+env:
+  RG_NAME: 'modern-spark'       # set this to the dot net version to use
+  SQL_SERVER: modern-spark-sql.database.windows.net
+  WEBAPP_NAME: spark-modern-app
+  ACR_URL: modernspark.azurecr.io
+  TAG_VERSION: 'v{0}'
+  AZURE_DATABASE_CONNECTION_STRING: 'Server=tcp:{0},1433;Initial Catalog=rewardsdb;User ID={1};Password={2}Persist Security Info=False;;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;'
+
+jobs:
+
+  buildAndPush:
+    if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
+    runs-on: windows-latest
+    env:
+      NUGET_VERSION: '5.3.1'  
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0
+
+    - name: Install Nuget
+      uses: nuget/setup-nuget@v1
+      with:
+        nuget-version: ${{ env.NUGET_VERSION}}
+
+    - name: NuGet to restore dependencies as well as project-specific tools that are specified in the project file
+      run: nuget restore Source/TailwindTraders.Rewards.Website.sln
+  
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.0
+    
+    - name: Run MSBuild
+      run: msbuild Source/TailwindTraders.Rewards.Website.sln
+
+    - name: Bicep Build
+      uses: aliencube/bicep-build-actions@v0.1
+      with:
+        files: 'Deploy/modern-infra.bicep'
+
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy Azure Resource Manager (ARM) Template
+      uses: Azure/arm-deploy@v1
+      id: iac
+      with:
+        resourceGroupName: ${{ env.RG_NAME }}
+        region: westeurope
+        template: 'Deploy/modern-infra.json'
+
+    - uses: microsoft/variable-substitution@v1 
+      with:
+        files: 'Source/Website/Web.config'
+      env:
+        dbContext: "${{ format(env.AZURE_DATABASE_CONNECTION_STRING, steps.iac.outputs.sqlServerURL, secrets.SQL_USERNAME, secrets.SQL_PASSWORD ) }}"
+
+    - uses: azure/docker-login@v1
+      with:
+        login-server: ${{ steps.iac.outputs.acrURL }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - run: |
+        docker build -f Website/Dockerfile ./Website -t ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
+        docker push ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
+    
+  deployCanary:
+    runs-on: windows-latest
+    needs: [buildAndPush]
+    environment: canary
+    steps:
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+  
+    - name: 'Deploy to Azure Web App for Container'
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ env.WEBAPP_NAME }} 
+        slot-name: canary
+        images: ${{ env.ACR_URL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
+
+        
+  deployOnAzure:
+    if: ${{ github.event.label.name == 'prod' }}
+    runs-on: windows-latest
+    needs: [deployCanary]
+    environment: production
+    steps:
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 'Deploy to Azure Web App for Container'
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ env.WEBAPP_NAME }} 
+        images: ${{ env.ACR_URL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}

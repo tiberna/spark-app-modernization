@@ -27,4 +27,12 @@ resource sqlDB 'Microsoft.Sql/servers/databases@2020-08-01-preview' = {
   }
 }
 
+resource sqlDBRule 'Microsoft.Sql/servers/firewallRules@2015-05-01-preview' = {
+  name: '${sqlServer.name}/AllowInternalAzureIps'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
 output sqlServerURL string = sqlServer.properties.fullyQualifiedDomainName

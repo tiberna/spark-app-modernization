@@ -1,4 +1,3 @@
-
 param location string
 param appName string
 param dockerRegistryUrl string
