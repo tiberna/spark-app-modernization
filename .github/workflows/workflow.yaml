@@ -18,7 +18,7 @@ env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 jobs:
 
-  buildAndPush:
+  build:
     if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
     runs-on: windows-latest
     env:
@@ -42,12 +42,33 @@ jobs:
       uses: microsoft/setup-msbuild@v1.0.0
     
     - name: Run MSBuild
-      run: msbuild Source/TailwindTraders.Rewards.Website.sln
+      run: msbuild Source/TailwindTraders.Rewards.Website.sln /p:Configuration=Release /p:DeployOnBuild=true /p:PublishProfile=FolderProfile
+
+    - name: Run a one-line script
+      run: |
+        cp .\Source\Dockerfile .\Publish\
+        cp .\Deploy\modern-infra.bicep .\Publish\
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: myArtifact
+        path: Publish
+
+  push:
+    if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download a single artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: my-artifact
 
     - name: Bicep Build
       uses: aliencube/bicep-build-actions@v0.1
       with:
-        files: 'Deploy/modern-infra.bicep'
+        files: 'Publish/modern-infra.bicep'
 
     - uses: azure/login@v1
       with:
@@ -59,11 +80,11 @@ jobs:
       with:
         resourceGroupName: ${{ env.RG_NAME }}
         region: westeurope
-        template: 'Deploy/modern-infra.json'
+        template: 'Publish/modern-infra.json'
 
     - uses: microsoft/variable-substitution@v1 
       with:
-        files: 'Source/Website/Web.config'
+        files: 'Publish/Web.config'
       env:
         dbContext: "${{ format(env.AZURE_DATABASE_CONNECTION_STRING, steps.iac.outputs.sqlServerURL, secrets.SQL_USERNAME, secrets.SQL_PASSWORD ) }}"
 
@@ -74,12 +95,12 @@ jobs:
         password: ${{ secrets.ACR_PASSWORD }}
 
     - run: |
-        docker build -f Website/Dockerfile ./Website -t ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
+        docker build -f Publish/Dockerfile ./Website -t ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
         docker push ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
     
   deployCanary:
     runs-on: windows-latest
-    needs: [buildAndPush]
+    needs: [push]
     environment: canary
     steps:
     - name: Login to Azure
