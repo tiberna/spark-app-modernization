@@ -47,7 +47,7 @@ jobs:
     - name: Run a one-line script
       run: |
         cp .\Source\Dockerfile .\Publish\
-        cp .\Deploy\modern-infra.bicep .\Publish\
+        cp .\Deploy\*.bicep .\Publish\Deploy
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v1.0.0
@@ -68,7 +68,7 @@ jobs:
     - name: Bicep Build
       uses: aliencube/bicep-build-actions@v0.1
       with:
-        files: 'Publish/modern-infra.bicep'
+        files: 'Deploy/modern-infra.bicep'
 
     - uses: azure/login@v1
       with:
@@ -80,11 +80,11 @@ jobs:
       with:
         resourceGroupName: ${{ env.RG_NAME }}
         region: westeurope
-        template: 'Publish/modern-infra.json'
+        template: 'Deploy/modern-infra.json'
 
     - uses: microsoft/variable-substitution@v1 
       with:
-        files: 'Publish/Web.config'
+        files: 'Web.config'
       env:
         dbContext: "${{ format(env.AZURE_DATABASE_CONNECTION_STRING, steps.iac.outputs.sqlServerURL, secrets.SQL_USERNAME, secrets.SQL_PASSWORD ) }}"
 
