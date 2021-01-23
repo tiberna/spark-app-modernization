@@ -84,7 +84,6 @@ jobs:
       id: iac
       with:
         resourceGroupName: ${{ env.RG_NAME }}
-        region: westeurope
         template: 'Deploy/modern-infra.json'
 
     - uses: microsoft/variable-substitution@v1 
