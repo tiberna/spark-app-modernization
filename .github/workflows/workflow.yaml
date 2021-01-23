@@ -105,7 +105,7 @@ jobs:
       with:
         subscriptionId:  ${{ secrets.AZURE_SUBSCRIPTION }}
         resourceGroupName: ${{ env.RG_NAME }}
-        template: 'Deploy/modern-infra.json'
+        template: 'modern-infra.json'
 
     - uses: microsoft/variable-substitution@v1 
       with:
