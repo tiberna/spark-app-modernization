@@ -27,6 +27,10 @@ jobs:
       with:
         files: 'Deploy/*.bicep'
 
+    - run: |
+        ls 
+        ls Deploy 
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v1.0.0
       with:
@@ -81,12 +85,12 @@ jobs:
       RG_NAME: 'modern-spark-rg'  
 
     steps:
-    - name: Download a app-packaget
+    - name: Download a app-package
       uses: actions/download-artifact@v2
       with:
         name: app-package
 
-    - name: Download a app-packaget
+    - name: Download a arm-templates
       uses: actions/download-artifact@v2
       with:
         name: arm-templates
