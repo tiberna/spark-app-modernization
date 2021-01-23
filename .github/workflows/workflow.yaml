@@ -15,9 +15,28 @@ env:
   TAG_VERSION: 'v{0}'
 jobs:
 
+  prepare:
+    if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Bicep Build
+      uses: aliencube/bicep-build-actions@v0.1
+      with:
+        files: 'Deploy/*.bicep'
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: arm-templates
+        path: Deploy/*.json
+
   build:
     if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
     runs-on: windows-latest
+    needs: [prepare]
     env:
       NUGET_VERSION: '5.3.1'
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
@@ -45,13 +64,11 @@ jobs:
     - name: Run a one-line script
       run: |
         cp .\Source\Dockerfile .\Publish\
-        mkdir .\Publish\Deploy
-        cp .\Deploy\*.bicep .\Publish\Deploy\
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: my-artifact
+        name: app-package
         path: Publish
 
   push:
@@ -64,15 +81,15 @@ jobs:
       RG_NAME: 'modern-spark-rg'  
 
     steps:
-    - name: Download a single artifact
+    - name: Download a app-packaget
       uses: actions/download-artifact@v2
       with:
-        name: my-artifact
+        name: app-package
 
-    - name: Bicep Build
-      uses: aliencube/bicep-build-actions@v0.1
+    - name: Download a app-packaget
+      uses: actions/download-artifact@v2
       with:
-        files: 'Deploy/*.bicep'
+        name: arm-templates
 
     - uses: azure/login@v1
       with:
