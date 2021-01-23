@@ -35,7 +35,7 @@ jobs:
       uses: actions/upload-artifact@v1.0.0
       with:
         name: arm-templates
-        path: Deploy/*.json
+        path: Deploy
 
   build:
     if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
