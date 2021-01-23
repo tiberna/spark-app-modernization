@@ -72,7 +72,7 @@ jobs:
     - name: Bicep Build
       uses: aliencube/bicep-build-actions@v0.1
       with:
-        files: 'Deploy/modern-infra.bicep'
+        files: 'Deploy/*.bicep'
 
     - uses: azure/login@v1
       with:
