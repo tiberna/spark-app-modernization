@@ -78,7 +78,7 @@ jobs:
   push:
     if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
     needs: [build]
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     env:
       AZURE_DATABASE_CONNECTION_STRING: 'Server=tcp:{0},1433;Initial Catalog=rewardsdb;User ID={1};Password={2}Persist Security Info=False;;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;'
