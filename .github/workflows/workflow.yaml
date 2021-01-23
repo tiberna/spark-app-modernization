@@ -13,7 +13,6 @@ env:
   WEBAPP_NAME: spark-modern-app
   ACR_URL: modernspark.azurecr.io
   TAG_VERSION: 'v{0}'
-   
 jobs:
 
   build:
@@ -83,6 +82,7 @@ jobs:
       uses: Azure/arm-deploy@v1
       id: iac
       with:
+        subscriptionId:  ${{ secrets.AZURE_SUBSCRIPTION }}
         resourceGroupName: ${{ env.RG_NAME }}
         template: 'Deploy/modern-infra.json'
 
