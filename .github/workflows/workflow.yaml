@@ -143,17 +143,17 @@ jobs:
              {
                  "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
                  "value": "${{ secrets.ACR_PASSWORD }}",
-                 "slotSetting": false
+                 "slotSetting": true
              },
              {
                  "name": "DOCKER_REGISTRY_SERVER_URL",
                  "value": "${{ env.ACR_URL }}",
-                 "slotSetting": false
+                 "slotSetting": true
              },
              {
                  "name": "DOCKER_REGISTRY_SERVER_USERNAME",
                  "value": "${{ secrets.ACR_USERNAME  }}",
-                 "slotSetting": false
+                 "slotSetting": true
              }
          ]
   
