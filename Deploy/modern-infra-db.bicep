@@ -1,8 +1,8 @@
-param location string
+param location string = 'westeurope'
 
-param sqlServerName string
-param sqlDBName string
-param sqlAdminLogin string
+param sqlServerName string = 'modern-spark-sql'
+param sqlDBName string = 'rewardsdb'
+param sqlAdminLogin string = 'sqladmin'
 param sqlAdminPassword string
 
 resource sqlServer 'Microsoft.Sql/servers@2019-06-01-preview' = {
