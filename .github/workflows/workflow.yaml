@@ -1,15 +1,14 @@
 name: Spark Rewards Pipelines
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-    types: [labeled, opened, synchronize]
   workflow_dispatch:
-
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
 
 env:
-  SQL_SERVER: modern-spark-sql.database.windows.net
   WEBAPP_NAME: spark-modern-app
   ACR_URL: modernspark.azurecr.io
   TAG_VERSION: 'v{0}'
@@ -40,6 +39,9 @@ jobs:
     env:
       NUGET_VERSION: '5.3.1'
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      AZURE_DATABASE_CONNECTION_STRING: 'Server=tcp:{0},1433;Initial Catalog=rewardsdb;User ID={1};Password={2};Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;'
+      RG_NAME: 'modern-spark-rg' 
+      SQL_SERVER: modern-spark-sql.database.windows.net
     
     steps:
     - uses: actions/checkout@v2
@@ -64,27 +66,6 @@ jobs:
     - name: Run a one-line script
       run: |
         cp .\Source\Dockerfile .\Publish\
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: app-package
-        path: Publish
-
-  push:
-    if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
-    needs: [build]
-    runs-on: windows-latest
-
-    env:
-      AZURE_DATABASE_CONNECTION_STRING: 'Server=tcp:{0},1433;Initial Catalog=rewardsdb;User ID={1};Password={2};Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;'
-      RG_NAME: 'modern-spark-rg'  
-
-    steps:
-    - name: Download a app-package
-      uses: actions/download-artifact@v2
-      with:
-        name: app-package
 
     - name: Download a arm-templates
       uses: actions/download-artifact@v2
@@ -119,10 +100,12 @@ jobs:
         docker build -t ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }} .
         docker push ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
     
-  deployCanary:
+  staging:
     runs-on: windows-latest
     needs: [push]
-    environment: canary
+    environment: 
+      name: staging
+      url: ${{ steps.modern-rewards-staging.outputs.webapp-url }}
     steps:
     - name: Login to Azure
       uses: azure/login@v1
@@ -133,7 +116,7 @@ jobs:
       uses: Azure/appservice-settings@v1
       with:
        app-name: ${{ env.WEBAPP_NAME }} 
-       slot-name: canary
+       slot-name: staging
        app-settings-json: |
          [
              {
@@ -155,25 +138,53 @@ jobs:
   
     - name: 'Deploy to Azure Web App for Container'
       uses: azure/webapps-deploy@v2
+      id: modern-rewards-staging
       with: 
         app-name: ${{ env.WEBAPP_NAME }} 
-        slot-name: canary
+        slot-name: staging
         images: ${{ env.ACR_URL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
 
         
-  deployOnAzure:
+  production:
     if: ${{ github.event.label.name == 'prod' }}
     runs-on: windows-latest
     needs: [deployCanary]
-    environment: production
+    environment: 
+      name: production
+      url: ${{ steps.modern-rewards-prod.webapp-url }}
     steps:
     - name: Login to Azure
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    - name: Set Web App ACR authentication
+      uses: Azure/appservice-settings@v1
+      with:
+       app-name: ${{ env.WEBAPP_NAME }} 
+       app-settings-json: |
+         [
+             {
+                 "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+                 "value": "${{ secrets.ACR_PASSWORD }}",
+                 "slotSetting": false
+             },
+             {
+                 "name": "DOCKER_REGISTRY_SERVER_URL",
+                 "value": "[concat('https://',${{ env.ACR_URL }})]",
+                 "slotSetting": false
+             },
+             {
+                 "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+                 "value": "${{ secrets.ACR_USERNAME  }}",
+                 "slotSetting": false
+             }
+         ]
+  
+
     - name: 'Deploy to Azure Web App for Container'
       uses: azure/webapps-deploy@v2
+      id: modern-rewards-prod
       with: 
         app-name: ${{ env.WEBAPP_NAME }} 
         images: ${{ env.ACR_URL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}

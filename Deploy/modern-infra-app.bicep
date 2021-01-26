@@ -64,7 +64,7 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
 }
 
 resource appServiceSlot 'Microsoft.Web/sites/slots@2020-06-01' = {
-  name: '${appService.name}/canary'
+  name: '${appService.name}/staging'
   location: location
   
   tags: {
