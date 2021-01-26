@@ -27,10 +27,6 @@ jobs:
       with:
         files: 'Deploy/*.bicep'
 
-    - run: |
-        ls 
-        ls Deploy 
-
     - name: Upload Artifact
       uses: actions/upload-artifact@v1.0.0
       with:
@@ -132,30 +128,6 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Set Web App ACR authentication
-      uses: Azure/appservice-settings@v1
-      with:
-       app-name: ${{ env.WEBAPP_NAME }} 
-       slot-name: canary
-       app-settings-json: |
-         [
-             {
-                 "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
-                 "value": "${{ secrets.ACR_PASSWORD }}",
-                 "slotSetting": true
-             },
-             {
-                 "name": "DOCKER_REGISTRY_SERVER_URL",
-                 "value": "${{ env.ACR_URL }}",
-                 "slotSetting": true
-             },
-             {
-                 "name": "DOCKER_REGISTRY_SERVER_USERNAME",
-                 "value": "${{ secrets.ACR_USERNAME  }}",
-                 "slotSetting": true
-             }
-         ]
   
     - name: 'Deploy to Azure Web App for Container'
       uses: azure/webapps-deploy@v2
