@@ -102,7 +102,7 @@ jobs:
     
   staging:
     runs-on: windows-latest
-    needs: [push]
+    needs: [build]
     environment: 
       name: staging
       url: ${{ steps.modern-rewards-staging.outputs.webapp-url }}
@@ -148,7 +148,7 @@ jobs:
   production:
     if: ${{ github.event.label.name == 'prod' }}
     runs-on: windows-latest
-    needs: [deployCanary]
+    needs: [staging]
     environment: 
       name: production
       url: ${{ steps.modern-rewards-prod.webapp-url }}
