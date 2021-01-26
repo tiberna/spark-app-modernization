@@ -77,7 +77,7 @@ jobs:
     runs-on: windows-latest
 
     env:
-      AZURE_DATABASE_CONNECTION_STRING: 'Server=tcp:{0},1433;Initial Catalog=rewardsdb;User ID={1};Password={2}Persist Security Info=False;;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;'
+      AZURE_DATABASE_CONNECTION_STRING: 'Server=tcp:{0},1433;Initial Catalog=rewardsdb;User ID={1};Password={2};Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;'
       RG_NAME: 'modern-spark-rg'  
 
     steps:
