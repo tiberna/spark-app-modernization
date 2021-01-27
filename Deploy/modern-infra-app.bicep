@@ -1,4 +1,3 @@
-
 param location string
 param appName string
 param dockerRegistryUrl string
@@ -7,7 +6,6 @@ param dockerRegistryPassword string
 param dockerImage string
 
 var appServicePlanName = toLower('asp-${appName}')
-var webSiteName = toLower('app-${appName}')
 var dockerRuntimeCommand = 'DOCKER|${dockerImage}'
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
@@ -30,7 +28,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
 }
 
 resource appService 'Microsoft.Web/sites@2020-06-01' = {
-  name: webSiteName
+  name: appName
   location: location
   tags: {
     app: 'spark'
@@ -66,7 +64,7 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
 }
 
 resource appServiceSlot 'Microsoft.Web/sites/slots@2020-06-01' = {
-  name: '${appService.name}/canary'
+  name: '${appService.name}/staging'
   location: location
   
   tags: {
