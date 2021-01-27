@@ -82,7 +82,7 @@ jobs:
 
     - uses: microsoft/variable-substitution@v1 
       with:
-        files: '.\Source\Dockerfile\Web.config'
+        files: '.\Publish\Web.config'
       env:
         dbContext: "${{ format(env.AZURE_DATABASE_CONNECTION_STRING, env.SQL_SERVER, secrets.SQL_USERNAME, secrets.SQL_PASSWORD ) }}"
 
