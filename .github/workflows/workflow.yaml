@@ -15,7 +15,6 @@ env:
 jobs:
 
   prepare:
-    if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +32,6 @@ jobs:
         path: Deploy
 
   build:
-    if: ${{ github.event_name == 'pull_request' && github.event.action != 'labeled' }}
     runs-on: windows-latest
     needs: [prepare]
     env:
@@ -142,7 +140,6 @@ jobs:
 
         
   production:
-    if: ${{ github.event.label.name == 'prod' }}
     runs-on: windows-latest
     needs: [staging]
     environment: 
