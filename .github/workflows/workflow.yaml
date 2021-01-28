@@ -144,7 +144,7 @@ jobs:
     needs: [staging]
     environment: 
       name: production
-      url: ${{ steps.modern-rewards-prod.webapp-url }}
+      url: ${{ steps.modern-rewards-prod.outputs.webapp-url }}
     steps:
     - name: Login to Azure
       uses: azure/login@v1
