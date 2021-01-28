@@ -90,9 +90,9 @@ jobs:
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
 
-    #- run: |
-    #    docker build -f .\Source\Dockerfile -t ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }} .\Publish\
-    #    docker push ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
+    - run: |
+        docker build -f .\Source\Dockerfile -t ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }} .\Publish\
+        docker push ${{ steps.iac.outputs.acrURL }}/${{ env.WEBAPP_NAME }}:${{ format(env.TAG_VERSION, github.event.number) }}
     
   staging:
     runs-on: windows-latest
