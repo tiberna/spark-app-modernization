@@ -2,19 +2,14 @@
 
 The customer service at [Tailwind Traders](https://github.com/Microsoft/TailwindTraders) use the following application to identify potential customers and request to enroll them in the loyalty program called "Rewards". In the application we have the customer information, their order history, a search bar to look for other customers and a checkbox to request to enroll the customer in the program. 
 
-![Tailwind Traders Rewards](Documents/Images/Rewards.png)
-
 You can take a look at our live running website following this address: [https://rewards.tailwindtraders.com](https://rewards.tailwindtraders.com) 
 
 ## Technical Information
 
 1. The application was built with .NET Framework 3.5 using ASP.NET Web Forms.
 1. The application is connected to a SQL Server Database.
-1. You can either run the Azure Durable Function or create a Logic App workflow in order to automate the enrollment process. Depending on what you want to showcase or learn you can use either, the Azure Function use a [Twilio](https://www.twilio.com) account to send SMS or [SendGrid](https://docs.microsoft.com/en-us/azure/sendgrid-dotnet-how-to-send-email) to send an email, this workflow waits for an approval, while the Logic App just send a welcome email to the customer.
 
 We use GitHub Actions in order to manage the CI/CD process of this application:
-
-![GitHub Pipelines](https://github.com/microsoft/TailwindTraders-Rewards/workflows/TailwindTraders%20Rewards%20Pipelines/badge.svg?branch=main)
 
 > Note: In the **web.config** file of the website project, in line 43 and 44 you can setup the credentials required to get into the Administration dashboard to add, modify or delete the sample data of the customers.
 
