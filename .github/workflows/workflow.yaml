@@ -1,4 +1,4 @@
-name: Spark Rewards Pipelines
+name: Rewards Pipelines
 on:
   workflow_dispatch:
   pull_request:
@@ -6,8 +6,8 @@ on:
       - main
 
 env:
-  WEBAPP_NAME: spark-modern-app
-  ACR_URL: modernspark.azurecr.io
+  WEBAPP_NAME: devdays-modern-app
+  ACR_URL: moderndevdays.azurecr.io
   TAG_VERSION: 'v{0}'
 jobs:
 
@@ -35,7 +35,7 @@ jobs:
       NUGET_VERSION: '5.3.1'
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       AZURE_DATABASE_CONNECTION_STRING: 'Server=tcp:{0},1433;Initial Catalog=rewardsdb;User ID={1};Password={2};Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=true;TrustServerCertificate=False;Connection Timeout=30;'
-      RG_NAME: 'modern-spark-rg' 
+      RG_NAME: 'devdays-rg' 
       SQL_SERVER: modern-spark-sql.database.windows.net
     
     steps:
