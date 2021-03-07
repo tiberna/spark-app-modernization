@@ -20,7 +20,7 @@ jobs:
     - name: Bicep Build
       uses: aliencube/bicep-build-actions@v0.1
       with:
-        files: 'Deploy/*.bicep'
+        files: 'Deploy/modern-infra.bicep'
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v1.0.0
