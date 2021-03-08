@@ -17,7 +17,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
     name: 'P1V3'
   }
   tags: {
-    app: 'spark'
+    app: 'devdays'
     kind: 'webapp'
   }
   properties: {
@@ -31,7 +31,7 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
   name: appName
   location: location
   tags: {
-    app: 'spark'
+    app: 'devdays'
     kind: 'webapp'
   }
   properties: {
@@ -68,7 +68,7 @@ resource appServiceSlot 'Microsoft.Web/sites/slots@2020-06-01' = {
   location: location
   
   tags: {
-    app: 'spark'
+    app: 'devdays'
     kind: 'webapp-slot'
   }
   properties: {

@@ -1,12 +1,12 @@
 param location string = 'westeurope'
 
-param appName string = 'spark-modern-app'
+param appName string = 'devdays-modern-app'
 param dockerRegistryUrl string = 'https://mcr.microsoft.com'
 param dockerRegistryUsername string = ''
 param dockerRegistryPassword string = ''
 param dockerImage string = 'mcr.microsoft.com/azure-app-service/samples/aspnethelloworld:latest'
 
-param acrName string = 'modernspark'
+param acrName string = 'moderndevdays'
 
 module app './modern-infra-app.bicep' = {
   name: 'appDeploy'

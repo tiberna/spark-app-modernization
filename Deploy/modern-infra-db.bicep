@@ -1,6 +1,6 @@
 param location string = 'westeurope'
 
-param sqlServerName string = 'modern-spark-sql'
+param sqlServerName string = 'modern-sql'
 param sqlDBName string = 'rewardsdb'
 param sqlAdminLogin string = 'sqladmin'
 param sqlAdminPassword string
@@ -13,7 +13,7 @@ resource sqlServer 'Microsoft.Sql/servers@2019-06-01-preview' = {
     administratorLoginPassword: sqlAdminPassword
   }
   tags: {
-    app: 'spark'
+    app: 'devdays'
     kind: 'database'
   }
 }
