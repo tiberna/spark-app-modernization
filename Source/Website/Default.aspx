@@ -10,7 +10,7 @@
             <img class="logo" src="/Content/img/logo.svg" alt="Tailwind Trader's blue logo" />
         </h1>
         <asp:PlaceHolder runat="server" ID="spanCustomer" Visible="true">
-            <h2 class="title">Contact info</h2>
+            <h2 class="title">Contact Info - DevDays</h2>
             <div class="content">
                 <p class="content__row">
                     <span class="content__text">Name</span>
